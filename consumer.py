@@ -8,9 +8,9 @@ def consume_messages(topic_name, consumer_group, consumer_name, count=1):
         messages = redis_client.xreadgroup(groupname=consumer_group, consumername=consumer_name,
                                            streams={topic_name: '>'}, count=count)
         if messages:
-            for message in messages:
-                stream, msg = message
-                print(f"Consumed message: {msg}")
-                redis_client.xack(topic_name, consumer_group, msg[0])  # Acknowledge the message
+            for stream, stream_messages in messages:
+                for message_id, fields in stream_messages:
+                    print(f"Consumed message: {fields}")
+                    redis_client.xack(topic_name, consumer_group, message_id)  # Acknowledge the message
     except Exception as e:
         print(f"Error consuming messages: {str(e)}")
